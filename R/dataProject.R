@@ -1,5 +1,5 @@
 source("panelProjection.R")
-
+source("~/Work/RCAv2/R/panelProjection.R")
 #' Compute Reference Component features for clustering analysis
 #'
 #' @param rca.obj RCA object.
@@ -52,14 +52,16 @@ dataProject <- function(rca.obj, method = "GlobalPanel", customPath = NULL, corM
         # Load reference panel data from environment
         data(ReferencePanel, envir = environment())
         panel = ReferencePanel$ColonEpiPanel
-        gene.names = as.character(str_extract_all(rownames(panel), "_[[:alnum:]]+_"))
-        rownames(panel) = str_sub(gene.names, 2, -2)
         # Scale panel by median
         fc = apply(panel, 1, function(x) x - median(x))
         fs = fc > 1.5
-        panel + panel[apply(fs, 1, function(x)
+        panel = panel[apply(fs, 1, function(x)
             sum(x)) > 0,]
-        
+        # Convert rownames to gene symbol and remove duplicates
+        gene.names = as.character(str_extract_all(rownames(panel), "_.+_"))
+        gene.names = str_sub(gene.names, 2, -2)
+        panel = panel[-which(duplicated(gene.names)),]
+        rownames(panel) = gene.names[-which(duplicated(gene.names))]
         # Store projection data
         projection= panelProjection(sc_data, panel, corMeth=corMeth,
                                     power=power, scale=scale)
