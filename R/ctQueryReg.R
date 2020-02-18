@@ -15,7 +15,7 @@
 #' will not be detected but with a specific corresponding concatened query.
 #' @export
 #' 
-ctQueryReg = function(query, db ,remakedb=TRUE) {
+ctQueryReg = function(query, db, remakedb=TRUE) {
     # Parse words in db if needed
     if (remakedb) {
         new_db = matrix(ncol = 2)
@@ -32,7 +32,7 @@ ctQueryReg = function(query, db ,remakedb=TRUE) {
     }
     # If user provides several queries for one db, apply this function for each query
     if (length(query) > 1) {
-        db.match.list = apply(as.array(query), MARGIN = 1, FUN = "ct_query_reg", db=db, remakedb=FALSE)
+        db.match.list = apply(as.array(query), MARGIN = 1, FUN = "ctQueryReg", db=new_db, remakedb=FALSE)
         db.match = unlist(db.match.list)
         if (length(which(duplicated(db.match))) > 0) {
             db.match = db.match[-which(duplicated(db.match))]
@@ -58,6 +58,9 @@ ctQueryReg = function(query, db ,remakedb=TRUE) {
         query.reg = paste0(c("^", query.words, "S?$"), collapse = "")
         db.match.word = new_db[str_detect(new_db[,2], regex(query.reg, ignore_case = TRUE)), 1]
         db.match = union(db.match, db.match.word)
+        if (length(db.match) == 0) {
+            print(paste0("No match for query: ", query))
+        } 
     } 
     return(db.match)
 }
