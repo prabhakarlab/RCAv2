@@ -1,5 +1,4 @@
 source("panelProjection.R")
-source("~/Work/RCAv2/R/panelProjection.R")
 #' Compute Reference Component features for clustering analysis
 #'
 #' @param rca.obj RCA object.
@@ -8,10 +7,17 @@ source("~/Work/RCAv2/R/panelProjection.R")
 #' @param corMeth Any of the correlation measures supported by R, defaults to pearson
 #' @param power power to raise up to for the RCA features before clustering, default is 4
 #' @param scale True if the data should be scaled, False otherwise
+#' @param ctSelection A character vector of cell types if not NULL. Only selected cell types will be kept in projection. 
 #' @return RCA object.
 #' @export
 #'
-dataProject <- function(rca.obj, method = "GlobalPanel", customPath = NULL, corMeth = "pearson", power = 4, scale = T) {
+dataProject <- function(rca.obj,
+                        method = "GlobalPanel",
+                        customPath = NULL,
+                        corMeth = "pearson",
+                        power = 4,
+                        scale = T,
+                        ctSelection = NULL) {
 
     # Extract data
     sc_data <- rca.obj$data
@@ -39,7 +45,8 @@ dataProject <- function(rca.obj, method = "GlobalPanel", customPath = NULL, corM
                                                    corMeth=corMeth,
                                                    power=power, scale=scale, 
                                                    apply_threshold=TRUE, 
-                                                   threshold=(ReferencePanel$at)[i])
+                                                   threshold=(ReferencePanel$at)[i],
+                                                   ctSelection = ctSelection)
         }
 
         # Combine the projection result of multiple Global Panel fragments
@@ -74,7 +81,8 @@ dataProject <- function(rca.obj, method = "GlobalPanel", customPath = NULL, corM
             sum(x)) > 0,]
         # Store projection data
         projection= panelProjection(sc_data, panel, corMeth=corMeth,
-                                    power=power, scale=scale)
+                                    power=power, scale=scale,
+                                    ctSelection = ctSelection)
     }
     
     # If panel for correlation is ENCODEPanel
@@ -85,7 +93,8 @@ dataProject <- function(rca.obj, method = "GlobalPanel", customPath = NULL, corM
         
         # Store projection data
         projection= panelProjection(sc_data, ENCODEPanel, corMeth=corMeth,
-                                    power=power, scale=scale)
+                                    power=power, scale=scale,
+                                    ctSelection = ctSelection)
     }
     
     # If no provided method is chosen, it is assumed that the user wishes to use a custom panel
@@ -96,9 +105,14 @@ dataProject <- function(rca.obj, method = "GlobalPanel", customPath = NULL, corM
         
         # Store projection data
         projection = panelProjection(sc_data, panel, corMeth=corMeth,
-                                    power=power, scale=scale)
+                                    power=power, scale=scale,
+                                    ctSelection = ctSelection)
     }
-
+    
+    if (is.null(projection)) {
+        print("Not any projection was succesfull for this panel.")
+        return(NULL)
+    }
     # Store projection result as Matrix
     projection = as.matrix(projection)
     projection = as(projection, "dgCMatrix")
