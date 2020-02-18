@@ -1,6 +1,8 @@
+source("ctQueryReg.R")
+
 #' Compute Reference Component features for clustering analysis
 #'
-#' @param rca.obj RCA object.
+#' @param sc_data data field from an RCA object.
 #' @param panel Reference panel as a matrix
 #' @param corMeth Any of the correlation measures supported by R, defaults to pearson
 #' @param power power to raise up to for the RCA features before clustering, default is 4
@@ -11,21 +13,42 @@
 #' @export
 #'
 
-panelProjection = function(sc_data, panel, corMeth="pearson", power=4, scale=TRUE, apply_threshold=FALSE, threshold=NULL) {
+panelProjection = function(sc_data,
+                           panel,
+                           corMeth="pearson",
+                           power=4,
+                           scale=TRUE,
+                           apply_threshold=FALSE,
+                           threshold=NULL,
+                           ctSelection = NULL) {
+    
+    # Apply selection of cell types
+    if (!is.null(ctSelection)) {
+        selected.ct = ctQueryReg(ctSelection, colnames(panel))
+        if (length(selected.ct) != 0) {
+            genes.names = rownames(panel)
+            panel = as.matrix(panel[,selected.ct])
+            rownames(panel) = genes.names
+            colnames(panel) = selected.ct
+        } else {
+            print("No match found for this ctSelection, no projection was done.")
+            return(NULL)
+        }
+    }
     
     # Select genes that are shared by the input data and the panel
     shared_genes <- intersect(rownames(sc_data), rownames(panel))
     print(paste0("Projection on ", length(shared_genes), " genes."))
     
     # Reduce the panel and input data to the shared genes
-    subset_panel = panel[shared_genes, ]
+    subset_panel = as.matrix(panel[shared_genes, ])
+    colnames(subset_panel) = colnames(panel)
     subset_data = sc_data[shared_genes, , drop = FALSE]
     
     # For values in the panel below the minimum threshold, set those values to threshold
     if (apply_threshold) {
         subset_panel[subset_panel <= threshold] = threshold
     }
-    
     # Compute projection of input data with the panel
     if(corMeth == "pearson") {
         subset_panel = as.matrix(subset_panel)
@@ -46,6 +69,5 @@ panelProjection = function(sc_data, panel, corMeth="pearson", power=4, scale=TRU
                            center = TRUE,
                            scale = TRUE)
     }
-    
     return(projection)
 }
