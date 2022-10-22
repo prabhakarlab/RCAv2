@@ -4,6 +4,7 @@
 #' @param confidence a parameter indicating the difference between z-scores. If the difference is below this threshold, the cell type will be set to unknown (default NULL).
 #' @param ctRank parameter indicating whether a relative rank coloring for each cell type shall be computed (default FALSE).
 #' @param cSCompute parameter indicating wheter the confidence score should be computed for each cell (default FALSE).
+#' @param vec a parameter indicating vectorization in computing cell type estimates
 #' @return RCA object.
 #'
 #' @examples
@@ -14,7 +15,7 @@
 #' RCA.pbmcs <- estimateCellTypeFromProjection(RCA.pbmcs)
 #' @export
 #'
-estimateCellTypeFromProjection <- function(rca.obj, confidence = NULL, ctRank = F, cSCompute = F) {
+estimateCellTypeFromProjection <- function(rca.obj, confidence = NULL, ctRank = F, cSCompute = F, vec = F) {
 
         # Returns the likeliest cell type of a cell with respect to a confidence threshold
         cTIdf <- function(x, confidence) {
@@ -60,16 +61,28 @@ estimateCellTypeFromProjection <- function(rca.obj, confidence = NULL, ctRank = 
         cellTypes <- base::list()
         confidenceScore <- base::list()
         relativeColorRank <- base::list()
-        for (i in base::c(1:base::dim(rca.obj$projection.data)[2])) {
-            if (base::is.null(confidence)) {
-                cellTypes <- base::c(cellTypes, cTIdfWU(rca.obj$projection.data[, i]))
-            }
-            else{
-                cellTypes <-
-                    base::c(cellTypes,
-                      cTIdf(rca.obj$projection.data[, i], confidence))
+        
+        if (vec) {
+            
+            if (!is.null(confidence)) warning('Vectorization not available for cell type estimates with confidence scores')
+            projection <- rca.obj$projection.data
+            cellTypes <- as.list(rownames(projection)[max.col(Matrix::t(projection))])
+            
+        } else {
+            
+            for (i in base::c(1:base::dim(rca.obj$projection.data)[2])) {
+                if (base::is.null(confidence)) {
+                    cellTypes <- base::c(cellTypes, cTIdfWU(rca.obj$projection.data[, i]))
+                }
+                else{
+                    cellTypes <-
+                        base::c(cellTypes,
+                                cTIdf(rca.obj$projection.data[, i], confidence))
+                }
             }
         }
+        
+        
         if (cSCompute) {
             for (i in base::c(1:base::dim(rca.obj$projection.data)[2])) {
                 confidenceScore <-

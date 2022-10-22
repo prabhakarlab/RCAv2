@@ -8,7 +8,8 @@ estimateCellTypeFromProjection(
   rca.obj,
   confidence = NULL,
   ctRank = F,
-  cSCompute = F
+  cSCompute = F,
+  vec = F
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ estimateCellTypeFromProjection(
 \item{ctRank}{parameter indicating whether a relative rank coloring for each cell type shall be computed (default FALSE).}
 
 \item{cSCompute}{parameter indicating wheter the confidence score should be computed for each cell (default FALSE).}
+
+\item{vec}{a parameter indicating vectorization in computing cell type estimates}
 }
 \value{
 RCA object.

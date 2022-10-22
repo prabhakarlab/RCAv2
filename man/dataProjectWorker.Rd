@@ -27,7 +27,7 @@ dataProjectWorker(
 
 \item{scale}{True if the data should be scaled, False otherwise}
 
-\item{min.cell.number.expressing}{Minimum number of cells (0 percent -100 percent) expressing a gene such that it is considered in the projection step, default is 1 percent}
+\item{min.cell.number.expressing}{Minimum percent of cells (0 percent -100 percent) expressing a gene such that it is considered in the projection step, default is 1 percent}
 }
 \value{
 a projection matrix.
