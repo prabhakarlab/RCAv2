@@ -4,12 +4,14 @@
 \alias{estimateCellTypeFromProjectionPerCluster}
 \title{Estimate the most likely cell type from the projection to the reference panel}
 \usage{
-estimateCellTypeFromProjectionPerCluster(rca.obj, homogeneity = NULL)
+estimateCellTypeFromProjectionPerCluster(rca.obj, homogeneity = NULL, vec = F)
 }
 \arguments{
 \item{rca.obj}{RCA object.}
 
 \item{homogeneity}{a parameter indicating the homogeneity of the cluster. If the difference is below this threshold, the cell type will be set to unknown (default NULL).}
+
+\item{vec}{a parameter indicating vectorization in computing cell type estimates}
 }
 \value{
 RCA object.

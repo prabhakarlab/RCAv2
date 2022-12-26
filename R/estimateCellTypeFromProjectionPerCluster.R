@@ -2,6 +2,7 @@
 #'
 #' @param rca.obj RCA object.
 #' @param homogeneity a parameter indicating the homogeneity of the cluster. If the difference is below this threshold, the cell type will be set to unknown (default NULL).
+#' @param vec a parameter indicating vectorization in computing cell type estimates
 #' @return RCA object.
 #'
 #' @examples
@@ -13,26 +14,26 @@
 #' @export
 #'
 
-estimateCellTypeFromProjectionPerCluster <- function(rca.obj, homogeneity=NULL) {
+estimateCellTypeFromProjectionPerCluster <- function(rca.obj, homogeneity=NULL,vec=F) {
 
     # Assign data to tmp variables
     projection <- rca.obj$projection.data
     clusterColors <- rca.obj$clustering.out$dynamicColorsList[[1]]
 
-    # Vectorized
-    cellTypes <- as.list(rownames(projection)[max.col(Matrix::t(projection))])
-
-    # # Previous version
-    # # Returning the likeliest cell type of a cell irrespective of a confidence score
-    # cTIdfWU <- function(x){
-    #     return(base::names(x)[base::which(x == base::max(x))])
-    # }
-    # 
-    # # Determine the likeliest cell type for each cell.
-    # cellTypes <- base::list()
-    # for (i in base::c(1:base::dim(projection)[2])) {
-    #     cellTypes <- base::c(cellTypes,cTIdfWU(projection[,i]))
-    # }
+    if (vec) {
+        # Vectorized
+        cellTypes <- as.list(rownames(projection)[max.col(Matrix::t(projection))])
+    } else {
+        # Returning the likeliest cell type of a cell irrespective of a confidence score
+        cTIdfWU <- function(x){
+            return(base::names(x)[base::which(x == base::max(x))])
+        }
+        # Determine the likeliest cell type for each cell.
+        cellTypes <- base::list()
+        for (i in base::c(1:base::dim(projection)[2])) {
+            cellTypes <- base::c(cellTypes,cTIdfWU(projection[,i]))
+        }
+    }
 
     # Compute the cell type compositions of each cluster using per cell cell type predictions
     enrichmentAll <- base::c()
