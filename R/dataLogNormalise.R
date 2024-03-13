@@ -13,7 +13,7 @@
 dataLogNormalise <- function(rca.obj, scale.factor = 10000) {
 
     # Extract data from RCA object
-    raw.data <- as.matrix(rca.obj$raw.data)
+    raw.data <- matrix(rca.obj$raw.data)
 
     # Compute sequencing depth vector
     seqDepthVec <- Matrix::colSums(raw.data)
